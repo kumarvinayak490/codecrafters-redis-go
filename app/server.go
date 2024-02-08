@@ -39,7 +39,7 @@ func main() {
 			fmt.Println("Error accepting connection: ", err.Error())
 			break
 		}
-		handleConnection(conn)
+		go handleConnection(conn)
 
 	}
 
