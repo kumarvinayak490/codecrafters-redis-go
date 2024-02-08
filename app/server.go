@@ -15,8 +15,14 @@ var store = make(map[string]string)
 func handleConnection(c net.Conn) {
 	defer c.Close()
 	sc := bufio.NewScanner(c)
-
+	noOfArgs := 0
 	for sc.Scan() {
+		text := sc.Text()
+		if strings.HasPrefix(text, "*") {
+			_, _ = fmt.Sscanf(text, "*%d", &noOfArgs)
+			fmt.Printf("Number of arguments: %d\n", noOfArgs)
+
+		}
 		switch command := strings.ToLower(sc.Text()); command {
 		case "ping":
 			c.Write([]byte("+PONG\r\n"))
@@ -36,7 +42,9 @@ func handleConnection(c net.Conn) {
 			sc.Scan()
 			v := sc.Text()
 			store[k] = v
-			if sc.Scan() {
+			if noOfArgs == 5 {
+				fmt.Println("more tokens")
+				sc.Scan()
 				sc.Scan()
 				sc.Scan()
 				sc.Scan()
