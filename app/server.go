@@ -34,7 +34,7 @@ func handleConnection(c net.Conn) {
 			sc.Scan()
 			v := sc.Text()
 			store[k] = v
-			c.Write([]byte("+VALUE SET\r\n"))
+			c.Write([]byte("+OK\r\n"))
 		case "get":
 			sc.Scan()
 			_ = sc.Text()
