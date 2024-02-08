@@ -23,8 +23,8 @@ func main() {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
-	b := make([]byte, 1024)
-	_, err = conn.Read(b)
+	buf := make([]byte, 1024)
+	_, err = conn.Read(buf)
 	if err != nil {
 		fmt.Println("Error reading from connection: ", err.Error())
 		os.Exit(1)
