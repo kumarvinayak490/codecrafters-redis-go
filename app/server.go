@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var store = make(map[string]string)
+
 func handleConnection(c net.Conn) {
 	defer c.Close()
 	sc := bufio.NewScanner(c)
@@ -22,6 +24,28 @@ func handleConnection(c net.Conn) {
 			sc.Scan()
 			s := sc.Text()
 			c.Write([]byte(fmt.Sprintf("%s\r\n%s\r\n", n, s)))
+		case "set":
+			sc.Scan()
+			_ = sc.Text()
+			sc.Scan()
+			k := sc.Text()
+			sc.Scan()
+			_ = sc.Text()
+			sc.Scan()
+			v := sc.Text()
+			store[k] = v
+			c.Write([]byte("+VALUE SET\r\n"))
+		case "get":
+			sc.Scan()
+			_ = sc.Text()
+			sc.Scan()
+			k := sc.Text()
+			fmt.Println(k)
+			if v, found := store[k]; found {
+				fmt.Println(v)
+				c.Write([]byte(fmt.Sprintf("$%s\r\n%s\r\n", fmt.Sprint(len(v)), v)))
+			}
+			c.Write([]byte("+NOT FOUND\r\n"))
 		}
 	}
 }
@@ -29,7 +53,6 @@ func handleConnection(c net.Conn) {
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
-
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	defer l.Close()
 	if err != nil {
