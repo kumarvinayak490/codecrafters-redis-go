@@ -25,7 +25,6 @@ func main() {
 			os.Exit(1)
 		}
 		buf := make([]byte, 1024)
-		fmt.Println("Received PING")
 		_, err = conn.Read(buf)
 		if err != nil {
 			fmt.Println("Error reading from connection: ", err.Error())
