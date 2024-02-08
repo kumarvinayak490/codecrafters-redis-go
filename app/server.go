@@ -7,6 +7,21 @@ import (
 	"os"
 )
 
+func handleConnection(c net.Conn) error {
+	defer c.Close()
+	buf := make([]byte, 1024)
+	_, err := c.Read(buf)
+	if err != nil {
+		return err
+	}
+	_, err = c.Write([]byte("+PONG\r\n"))
+	if err != nil {
+		fmt.Println("Error writing to connection: ", err.Error())
+		return err
+	}
+	return nil
+}
+
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
@@ -19,21 +34,13 @@ func main() {
 	}
 	for {
 		conn, err := l.Accept()
-		defer conn.Close()
 		if err != nil {
 			fmt.Println("Error accepting connection: ", err.Error())
-			os.Exit(1)
+			break
 		}
-		buf := make([]byte, 1024)
-		_, err = conn.Read(buf)
+		err = handleConnection(conn)
 		if err != nil {
-			fmt.Println("Error reading from connection: ", err.Error())
-			os.Exit(1)
-		}
-		_, err = conn.Write([]byte("+PONG\r\n"))
-		if err != nil {
-			fmt.Println("Error writing to connection: ", err.Error())
-			os.Exit(1)
+			break
 		}
 	}
 
