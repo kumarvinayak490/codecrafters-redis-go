@@ -7,19 +7,20 @@ import (
 	"os"
 )
 
-func handleConnection(c net.Conn) error {
+func handleConnection(c net.Conn) {
 	defer c.Close()
 	buf := make([]byte, 1024)
-	_, err := c.Read(buf)
-	if err != nil {
-		return err
+	for {
+		_, err := c.Read(buf)
+		if err != nil {
+			break
+		}
+		_, err = c.Write([]byte("+PONG\r\n"))
+		if err != nil {
+			fmt.Println("Error writing to connection: ", err.Error())
+			break
+		}
 	}
-	_, err = c.Write([]byte("+PONG\r\n"))
-	if err != nil {
-		fmt.Println("Error writing to connection: ", err.Error())
-		return err
-	}
-	return nil
 }
 
 func main() {
@@ -38,10 +39,8 @@ func main() {
 			fmt.Println("Error accepting connection: ", err.Error())
 			break
 		}
-		err = handleConnection(conn)
-		if err != nil {
-			break
-		}
+		handleConnection(conn)
+
 	}
 
 }
