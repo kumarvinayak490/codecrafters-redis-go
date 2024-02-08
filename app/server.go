@@ -1,24 +1,27 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-
 	"net"
 	"os"
+	"strings"
 )
 
 func handleConnection(c net.Conn) {
 	defer c.Close()
-	buf := make([]byte, 1024)
-	for {
-		_, err := c.Read(buf)
-		if err != nil {
-			break
-		}
-		_, err = c.Write([]byte("+PONG\r\n"))
-		if err != nil {
-			fmt.Println("Error writing to connection: ", err.Error())
-			break
+	sc := bufio.NewScanner(c)
+
+	for sc.Scan() {
+		switch command := strings.ToLower(sc.Text()); command {
+		case "ping":
+			c.Write([]byte("+PONG\r\n"))
+		case "echo":
+			sc.Scan()
+			n := sc.Text()
+			sc.Scan()
+			s := sc.Text()
+			c.Write([]byte(fmt.Sprintf("%s\r\n%s\r\n", n, s)))
 		}
 	}
 }
@@ -40,7 +43,6 @@ func main() {
 			break
 		}
 		go handleConnection(conn)
-
 	}
 
 }
