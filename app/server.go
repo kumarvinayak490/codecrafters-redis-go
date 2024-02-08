@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 var store = make(map[string]string)
@@ -34,6 +36,23 @@ func handleConnection(c net.Conn) {
 			sc.Scan()
 			v := sc.Text()
 			store[k] = v
+			if sc.Scan() {
+				sc.Scan()
+				sc.Scan()
+				sc.Scan()
+				fmt.Println(sc.Text())
+				et, err := strconv.Atoi(sc.Text())
+				if err != nil {
+					fmt.Println(err)
+					c.Write([]byte("+ERROR\r\n"))
+					break
+				}
+				timer := time.After(time.Duration(et) * time.Millisecond)
+				go func() {
+					<-timer
+					delete(store, k)
+				}()
+			}
 			c.Write([]byte("+OK\r\n"))
 		case "get":
 			sc.Scan()
@@ -45,7 +64,7 @@ func handleConnection(c net.Conn) {
 				fmt.Println(v)
 				c.Write([]byte(fmt.Sprintf("$%s\r\n%s\r\n", fmt.Sprint(len(v)), v)))
 			}
-			c.Write([]byte("+NOT FOUND\r\n"))
+			c.Write([]byte("$-1\r\n"))
 		}
 	}
 }
